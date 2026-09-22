@@ -20,29 +20,27 @@ ImgOp::ImgOp()
 }
 
 
-
+// this function would only work when m_channels == 3 and the datasize of the image is a multipler of 3;
 bool ImgOp::convGrayScaleFromRgb(Mode mode)
 {
-    if (mode == Mode::rgb)
-    {
-        std::size_t m_dataSize {getImgSize()};
-        #ifndef NDEBUG 
-        assert(m_dataSize % 3 == 0 && "datasize must be a multiplier of 3 in rgb mode.");
-        #endif
-        
-        if (m_dataSize % 3 != 0) throw std::runtime_error("datasize must be a mulitpler of 3 in rgb mode.");
-        std::uint8_t lumiVal{};
-        for (int i = 0; i < m_dataSize; i += 3)      
-        {
-            lumiVal = getLuminanceValue(m_data[i], m_data[i+1], m_data[i+2]); 
-            m_data[i] = lumiVal;
-            m_data[i+1] = lumiVal;
-            m_data[i+2] = lumiVal;
-        }
-    }
+
+    std::size_t m_dataSize {getImgSize()};
+    #ifndef NDEBUG 
+    assert(m_channels == 3 && "convGrayScaleFromRgb cannot be called when m_channels is not 3(rgb)."); 
+    assert(m_dataSize % 3 == 0 && "datasize must be a multiplier of 3 in rgb mode.");
+    #endif
+
+    if (m_channels != 3) throw std::runtime_error("convGrayScaleFromRgb cannot be called when m_channels is not 3(rgb).");
+    if (m_dataSize % 3 != 0) throw std::runtime_error("datasize must be a mulitpler of 3 in rgb mode.");
     
-
-
+    std::uint8_t lumiVal{};
+    for (int i = 0; i < m_dataSize; i += 3)      
+    {
+        lumiVal = getLuminanceValue(m_data[i], m_data[i+1], m_data[i+2]); 
+        m_data[i] = lumiVal;
+        m_data[i+1] = lumiVal;
+        m_data[i+2] = lumiVal;
+    }
     return true;
 }
 
