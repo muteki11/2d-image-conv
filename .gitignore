@@ -1,0 +1,100 @@
+# ==========================================
+# C++ Build & Output Files
+# ==========================================
+# Object files and libraries
+*.o
+*.obj
+*.a
+*.lib
+*.so
+*.so.*
+*.dylib
+*.dll
+
+# Executables
+*.exe
+*.out
+*.app
+
+# Debug symbols and databases
+*.pdb
+*.idb
+*.dSYM/
+*.suo
+*.user
+*.userosv
+*.sln.docstates
+
+# Precompiled headers
+*.gch
+*.pch
+
+# Dependency files
+*.d
+
+# ==========================================
+# Build Directories & Toolchains
+# ==========================================
+# CMake
+/build/
+/build-*/
+/bin/
+/lib/
+/out/
+CMakeCache.txt
+CMakeFiles/
+CMakePack/
+cmake_install.cmake
+install_manifest.txt
+Makefile
+/compile_commands.json
+
+# Visual Studio
+/.vs/
+/x64/
+/x86/
+/ARM/
+/Debug/
+/Release/
+
+# CLion & JetBrains
+/.idea/
+/cmake-build-*/
+
+# VS Code
+/.vscode/*
+!/.vscode/tasks.json
+!/.vscode/launch.json
+!/.vscode/settings.json
+!/.vscode/c_cpp_properties.json
+
+# Xcode
+*.xcodeproj/
+*.xcworkspace/
+
+# ==========================================
+# STB / Single-Header Libraries & Output
+# ==========================================
+# Ignore generated output images from your tests/runs
+/output/
+/generated/
+*.png_out.png
+*.jpg_out.jpg
+
+# Optional: If you download stb header files directly into a third_party/ or vendor/ 
+# directory, you generally DO commit them. However, if you fetch them via CMake/FetchContent
+# into a local cache directory, ignore that cache here:
+# /stb/
+# /deps/
+
+# ==========================================
+# Operating System & Temp Files
+# ==========================================
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+*~
+*.tmp
+
+
