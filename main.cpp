@@ -9,17 +9,18 @@
 #include "imgOp.h"
 
 
+// ./main src dest
 int main(int argc, char* argv[]) {
     
-    if (argc != 2) {
-        std::cerr << "only 1 argument must be passed!" << std::endl; 
+    if (argc != 3) {
+        std::cerr << "only 2 argument must be passed!" << std::endl; 
         return 1; 
     }
     
     ImgOp img {};     
     img.loadImg(argv[1]);
     img.convGrayScaleFromRgb(ImgOp::Mode::rgb); 
-    img.saveImg("new_image.jpg", ImgOp::ImageType::jpg);
+    img.saveImg(argv[2], ImgOp::ImageType::png);
 
 
     return 0;

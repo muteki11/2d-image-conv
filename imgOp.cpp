@@ -1,14 +1,18 @@
+#include <fstream>
 #include <iostream>
 #include <cstdint>
 #include <iterator>
 #include <ostream>
 #include <cassert>
 #include <stdexcept>
+#include <filesystem>
 #include "imgOp.h"
 #include "stb_image.h"
 #include "stb_image_write.h"
 
 //#define NDEBUG
+
+namespace fs = std::filesystem;
 
 
 ImgOp::ImgOp()
@@ -52,6 +56,13 @@ bool ImgOp::saveImg(const std::string& filePath, ImageType imageType)
     #endif
 
     if (m_data.empty()) throw std::runtime_error("Error: cannot save an empty image.");
+
+    fs::path path = filePath;
+    if (!fs::exists(path)) {
+        std::ofstream newFile(path);
+        if (!newFile.is_open()) throw std::runtime_error("Error: couldn't create file: '" + filePath + "'");
+        else newFile.close(); 
+    }
 
     int result{};
     if (imageType == ImageType::png) {
