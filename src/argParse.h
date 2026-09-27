@@ -12,6 +12,11 @@ class ArgParse
             png
         };
 
+        const std::map<std::string, DstFileType> typeMap{
+            {"jpg",  DstFileType::jpg},
+            {"png",  DstFileType::png},
+        };
+
         ArgParse();
         bool parse(int argc, char* argv[]);        
         
