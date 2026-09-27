@@ -2,6 +2,7 @@
 #include <iostream>
 #include <cstdint>
 #include <ostream>
+#include <stdexcept>
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb_image.h"
 #define STB_IMAGE_WRITE_IMPLEMENTATION
@@ -11,6 +12,8 @@
 #include "argParse.h"
 
 
+
+bool setValues(ArgParse& parser, ImgOp::ImageType& imageDstType);
 
 // ./main src dest
 int main(int argc, char* argv[]) {
@@ -22,15 +25,16 @@ int main(int argc, char* argv[]) {
 
      
     ArgParse parser{};
-    parser.parse(argc, argv);
-
-    //if (convApp.count("--dst") == 0) dstFilePath = srcFilePath;
+    if(!parser.parse(argc, argv)) return 0;
    
+    ImgOp::ImageType imageDstType;
+    bool res {setValues(parser, imageDstType)};
+    if (!res) throw std::runtime_error("setValues failed!");
 
     ImgOp img {};     
     img.loadImg(parser.getSrcFilePath());
     img.convGrayScaleFromRgb(ImgOp::Mode::rgb); 
-    img.saveImg(parser.getDstFilePath(), ImgOp::ImageType::png);
+    img.saveImg(parser.getDstFilePath(), imageDstType);
    
 
 
@@ -38,6 +42,25 @@ int main(int argc, char* argv[]) {
 }
 
 
+bool setValues(ArgParse& parser, ImgOp::ImageType& imageDstType)
+{
+    ArgParse::DstFileType fileType{parser.getDstFileType()};
+    switch (fileType)
+    {
+    case ArgParse::DstFileType::jpg:
+        imageDstType = ImgOp::ImageType::jpg; 
+        break; 
+    
+    case ArgParse::DstFileType::png:
+        imageDstType = ImgOp::ImageType::png;
+        break;
+    
+    default:
+        return false;
+    }
+
+    return true;
+}
 
 
 

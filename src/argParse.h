@@ -5,18 +5,26 @@
 
 class ArgParse
 {
-    private:
-        CLI::App m_convApp{"App description"};
-        std::string m_srcFilePath;
-        std::string m_dstFilePath;
- 
-
     public:
+        enum class DstFileType
+        {
+            jpg,
+            png
+        };
+
         ArgParse();
         bool parse(int argc, char* argv[]);        
         
         std::string getSrcFilePath() const;
         std::string getDstFilePath() const;
+        DstFileType getDstFileType() const; 
+
+    private:
+        CLI::App m_convApp{"App description"};
+        std::string m_srcFilePath;
+        std::string m_dstFilePath;
+        DstFileType m_dstFileType;
+
 };
 
 #endif
