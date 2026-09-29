@@ -14,8 +14,11 @@ private:
     int m_height {};
     // 3 = rgb, 1 = luminance
     int m_channels {};
-
+    // 70 levels of ramp intensity
+    const std::string m_asciiPalette {" .'`^\",:;Il!i><~+_-?][}{1)(|\\/tfjrxnuvczXYUJCLQ0OZmwqpdbkhao*#MW&8%B@$"};
+    
     std::uint8_t getLuminanceValue(const std::uint8_t red, const std::uint8_t green, const std::uint8_t blue) const;
+    std::uint8_t getAsciiChar(std::uint8_t luminanceValue) const;
 
 
 public:
@@ -42,6 +45,7 @@ public:
     std::size_t getImgSize() const; 
     void printInfo() const;
     void printPixel(const int offset) const; 
+    void printAscii() const;
     
 
     std::string getFilePath() const {return m_filePath;}

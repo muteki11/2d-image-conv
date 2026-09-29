@@ -57,7 +57,7 @@ bool ImgOp::convGrayScaleFromRgb(Mode mode)
    
     m_data = std::move(temp);
     m_channels = 1;
-   
+
     return true;
 }
 
@@ -133,8 +133,51 @@ std::uint8_t ImgOp::getLuminanceValue(const std::uint8_t red, const std::uint8_t
 }
 
 
-
 std::size_t ImgOp::getImgSize() const {return static_cast<std::size_t>(getHeight() * getwidth() * getChannels());}
+
+
+std::uint8_t ImgOp::getAsciiChar(std::uint8_t luminanceValue) const
+{
+    std::size_t index {};
+    index = (static_cast<size_t>(luminanceValue) * (m_asciiPalette.length() - 1)) / 255;
+    return m_asciiPalette[index];
+}
+
+
+// only runs when m_channels = 1; luminance
+void ImgOp::printAscii() const
+{
+    #ifndef NDEBUG
+    assert(m_channels == 1 && "m_channels must be 1(luminance) to print the image as Ascii");
+    #endif
+    if (m_channels != 1) throw std::runtime_error("m_channels is not 1");
+
+    std::size_t dataSize = m_data.size();
+    std::size_t index{};
+    std::uint8_t currChar {}; 
+    std::uint8_t currLumiValue {}; 
+    std::string rowBuffer {};
+    rowBuffer.reserve(m_width * 2); // multipled by 2 because we push 2 chars each time(for round shapes)
+
+    for (int row = 0; row < m_height; row++)
+    {
+        rowBuffer.clear(); 
+        for (int col = 0; col < m_width; col++)
+        {
+            // formula to print a 1d array as 2d; 
+            index = row * m_width + col;
+            currLumiValue = m_data[index];
+            currChar = getAsciiChar(currLumiValue);
+        
+            // pushing twice for round shapes accuracy 
+            rowBuffer.push_back(currChar);
+            rowBuffer.push_back(currChar);
+        }
+        std::cout << rowBuffer << '\n';
+
+    }
+
+}
 
 
 void ImgOp::printInfo() const
@@ -161,9 +204,6 @@ void ImgOp::printPixel(const int offset) const
     #endif
     
     std::cout << "pixel: " << static_cast<int>(m_data[offset]) << ", " << static_cast<int>(m_data[offset+1]) << ", " << static_cast<int>(m_data[offset+2]) << std::endl;
-
-
-
 
 }
 

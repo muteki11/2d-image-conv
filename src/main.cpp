@@ -34,8 +34,7 @@ int main(int argc, char* argv[]) {
     ImgOp img {};     
     img.loadImg(parser.getSrcFilePath());
     img.convGrayScaleFromRgb(ImgOp::Mode::luminance); 
-    img.saveImg(parser.getDstFilePath(), imageDstType);
-   
+    img.printAscii();   
 
 
     return 0;
