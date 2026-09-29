@@ -33,7 +33,7 @@ int main(int argc, char* argv[]) {
 
     ImgOp img {};     
     img.loadImg(parser.getSrcFilePath());
-    img.convGrayScaleFromRgb(ImgOp::Mode::rgb); 
+    img.convGrayScaleFromRgb(ImgOp::Mode::luminance); 
     img.saveImg(parser.getDstFilePath(), imageDstType);
    
 

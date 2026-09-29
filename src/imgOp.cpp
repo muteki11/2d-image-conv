@@ -6,6 +6,8 @@
 #include <cassert>
 #include <stdexcept>
 #include <filesystem>
+#include <utility>
+#include <vector>
 #include "imgOp.h"
 #include "stb_image.h"
 #include "stb_image_write.h"
@@ -21,9 +23,9 @@ ImgOp::ImgOp()
 
 
 // this function would only work when m_channels == 3 and the datasize of the image is a multipler of 3;
+// mode specifies how the resulting vector would be represented; rgb, luminance
 bool ImgOp::convGrayScaleFromRgb(Mode mode)
 {
-
     std::size_t m_dataSize {getImgSize()};
     #ifndef NDEBUG 
     assert(m_channels == 3 && "convGrayScaleFromRgb cannot be called when m_channels is not 3(rgb)."); 
@@ -34,6 +36,8 @@ bool ImgOp::convGrayScaleFromRgb(Mode mode)
     if (m_dataSize % 3 != 0) throw std::runtime_error("datasize must be a mulitpler of 3 in rgb mode.");
     
     std::uint8_t lumiVal{};
+   
+    // loop to set values for easier usage.
     for (int i = 0; i < m_dataSize; i += 3)      
     {
         lumiVal = getLuminanceValue(m_data[i], m_data[i+1], m_data[i+2]); 
@@ -41,6 +45,19 @@ bool ImgOp::convGrayScaleFromRgb(Mode mode)
         m_data[i+1] = lumiVal;
         m_data[i+2] = lumiVal;
     }
+    if (mode == Mode::rgb) return true;   
+
+    std::vector<uint8_t> temp;      
+    temp.reserve(m_dataSize);      
+    // mode has to be luminance here 
+    for (int i = 0; i < m_dataSize; i += 3)
+    {
+        temp.push_back(m_data[i]); 
+    }
+   
+    m_data = std::move(temp);
+    m_channels = 1;
+   
     return true;
 }
 
