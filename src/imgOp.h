@@ -31,7 +31,8 @@ public:
     enum class ImageType 
     {
         png,
-        jpg 
+        jpg,
+        txt // for ascii images  
     };
 
 
@@ -41,11 +42,12 @@ public:
     bool loadImg(const std::string& filePath);
     bool convGrayScaleFromRgb(Mode mode); 
     bool saveImg(const std::string& filePath, ImageType imageType);
-    
+   
+
     std::size_t getImgSize() const; 
     void printInfo() const;
     void printPixel(const int offset) const; 
-    void printAscii() const;
+    void WriteAscii(const std::string& filePath) const;
     
 
     std::string getFilePath() const {return m_filePath;}

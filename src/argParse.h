@@ -9,12 +9,14 @@ class ArgParse
         enum class DstFileType
         {
             jpg,
-            png
+            png,
+            txt 
         };
 
         const std::map<std::string, DstFileType> typeMap{
             {"jpg",  DstFileType::jpg},
             {"png",  DstFileType::png},
+            {"txt",  DstFileType::txt},
         };
 
         ArgParse();

@@ -90,6 +90,11 @@ bool ImgOp::saveImg(const std::string& filePath, ImageType imageType)
         result = stbi_write_jpg(filePath.c_str(), m_width, m_height, m_channels, m_data.data(), quality);
     }
     
+    else if (imageType == ImageType::txt)
+    {
+        WriteAscii(filePath);     
+    }
+
     else throw std::runtime_error("Invalid image type!");
 
     #ifndef NDEBUG
@@ -145,12 +150,17 @@ std::uint8_t ImgOp::getAsciiChar(std::uint8_t luminanceValue) const
 
 
 // only runs when m_channels = 1; luminance
-void ImgOp::printAscii() const
+void ImgOp::WriteAscii(const std::string& filePath) const
 {
+    
+    std::ofstream resFile{filePath};
     #ifndef NDEBUG
     assert(m_channels == 1 && "m_channels must be 1(luminance) to print the image as Ascii");
+    assert(resFile.is_open() && "couldn't open file."); 
     #endif
     if (m_channels != 1) throw std::runtime_error("m_channels is not 1");
+    if (!resFile.is_open()) throw std::runtime_error("Error: failed to open file.");
+    
 
     std::size_t dataSize = m_data.size();
     std::size_t index{};
@@ -159,6 +169,7 @@ void ImgOp::printAscii() const
     std::string rowBuffer {};
     rowBuffer.reserve(m_width * 2); // multipled by 2 because we push 2 chars each time(for round shapes)
 
+    
     for (int row = 0; row < m_height; row++)
     {
         rowBuffer.clear(); 
@@ -173,10 +184,10 @@ void ImgOp::printAscii() const
             rowBuffer.push_back(currChar);
             rowBuffer.push_back(currChar);
         }
-        std::cout << rowBuffer << '\n';
+        resFile << rowBuffer << '\n';
 
     }
-
+    resFile.close();
 }
 
 

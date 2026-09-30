@@ -34,7 +34,7 @@ int main(int argc, char* argv[]) {
     ImgOp img {};     
     img.loadImg(parser.getSrcFilePath());
     img.convGrayScaleFromRgb(ImgOp::Mode::luminance); 
-    img.printAscii();   
+    img.WriteAscii(parser.getDstFilePath());   
 
 
     return 0;
@@ -54,6 +54,10 @@ bool setValues(ArgParse& parser, ImgOp::ImageType& imageDstType)
         imageDstType = ImgOp::ImageType::png;
         break;
     
+    case ArgParse::DstFileType::txt:
+        imageDstType = ImgOp::ImageType::txt;
+        break;
+
     default:
         return false;
     }
