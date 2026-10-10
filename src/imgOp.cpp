@@ -1,4 +1,6 @@
+#include <cstddef>
 #include <fstream>
+#include <ios>
 #include <iostream>
 #include <cstdint>
 #include <iterator>
@@ -130,6 +132,104 @@ bool ImgOp::loadImg(const std::string& filePath)
 }
 
 
+
+std::vector<uint32_t> ImgOp::initDownSampleTable() const      
+{
+    #ifndef NDEBUG
+    assert(m_channels == 1 && "m_channels must be 1; this function uses 1 byte per pixel");
+    #endif
+    if (m_channels != 1) throw std::runtime_error("m_channels is not set to luminance.");
+
+    std::size_t originalDataSize {static_cast<std::size_t>(m_width) * m_height * m_channels};
+    std::vector<uint32_t> table;
+    std::size_t expected_size = static_cast<std::size_t>(m_width + 1) * (m_height + 1);
+
+    // adding a 0 column and a 0 row; should be 1 byte per pixel
+    table.resize((m_width+1) * (m_height+1) * m_channels, 0); 
+
+    uint32_t currTableCell{}; 
+    for (int dataY = 0; dataY < m_height; dataY++) 
+    {
+        for (int dataX = 0; dataX < m_width; dataX++)     
+        {
+            uint32_t currDataPixel = m_data[dataY * m_width + dataX]; 
+            
+            int tableX = dataX + 1;
+            int tableY = dataY + 1;
+
+            int aboveTable = (tableY-1) * (m_width+1) + tableX; 
+            int leftTable = tableY * (m_width+1) + (tableX-1); 
+            int topLeftTable = (tableY-1) * (m_width+1) + (tableX-1); 
+           
+
+            #ifndef NDEBUG
+            assert(aboveTable >= 0 && static_cast<std::size_t>(aboveTable) < expected_size);
+            assert(leftTable >= 0 && static_cast<std::size_t>(leftTable) < expected_size);
+            assert(topLeftTable >= 0 && static_cast<std::size_t>(topLeftTable) < expected_size);
+            #endif
+
+            uint32_t aboveTablePixel = table[aboveTable];
+            uint32_t leftTablePixel = table[leftTable];
+            uint32_t topLeftTablePixel = table[topLeftTable];
+
+            table[tableY * (m_width+1) + tableX] = currDataPixel + aboveTablePixel + leftTablePixel - topLeftTablePixel; 
+
+        } 
+
+    } 
+    return table;
+}
+
+
+
+
+void ImgOp::resizeImage(int new_height, int new_width)
+{
+    #ifndef NDEBUG
+    assert(m_channels == 1 && "this function only supports 1 byte per pixel"); 
+    #endif
+    if (m_channels != 1) throw std::runtime_error("m_channels not set to luminance");
+    
+    // m_channels should be 1 anyway for now
+    std::size_t originalDataSize {static_cast<std::size_t>(m_width) * m_height * m_channels}; 
+    std::size_t newDataSize {static_cast<std::size_t>(new_width) * new_height * m_channels};
+
+    std::vector<uint32_t> table {initDownSampleTable()};
+    std::vector<uint8_t> tmp; 
+    tmp.resize(newDataSize);
+
+    uint8_t currLumi {};
+    
+    int sourceX1 {};
+    int sourceY1 {};
+    int sourceX2 {};
+    int sourceY2 {};
+    for (int y = 0; y < new_height; y++) 
+    {
+        for (int x = 0; x < new_width; x++)
+        {
+            sourceX1 = (x * m_width) / new_width; 
+            sourceY1 = (y * m_height) / new_height; 
+            sourceX2 = ((x+1) * m_width) / new_width; 
+            sourceY2 = ((y+1) * m_height) / new_height; 
+
+            int table_stride = m_width + 1;
+            uint32_t sumTopLeft = table[sourceY1 * table_stride + sourceX1]; // Top-Left
+            uint32_t sumTopRight = table[sourceY1 * table_stride + sourceX2]; // Top-Right
+            uint32_t sumBottomLeft = table[sourceY2 * table_stride + sourceX1]; // Bottom-Left
+            uint32_t sumBottomRight = table[sourceY2 * table_stride + sourceX2]; // Bottom-Right
+
+            uint32_t sumRec = sumBottomRight - sumBottomLeft - sumTopRight + sumTopLeft;
+            currLumi = static_cast<uint8_t>(sumRec / ((sourceX2 - sourceX1) * (sourceY2 - sourceY1))); 
+            tmp[y * new_width + x] = currLumi;
+        } 
+    }
+
+    m_data = std::move(tmp);
+    m_height = new_height;
+    m_width = new_width;
+
+}
 
 
 std::uint8_t ImgOp::getLuminanceValue(const std::uint8_t red, const std::uint8_t green, const std::uint8_t blue) const
