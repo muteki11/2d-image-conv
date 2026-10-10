@@ -51,7 +51,7 @@ public:
     void printInfo() const;
     void printPixel(const int offset) const; 
     void WriteAscii(const std::string& filePath) const;
-
+    void printAsciiCenteredLive() const;
 
     std::string getFilePath() const {return m_filePath;}
     int getwidth() const {return m_width;}

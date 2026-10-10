@@ -262,6 +262,8 @@ void ImgOp::WriteAscii(const std::string& filePath) const
     if (!resFile.is_open()) throw std::runtime_error("Error: failed to open file.");
     
 
+    int canvas_width = 2546; 
+    int canvas_height = 425; 
     std::size_t dataSize = m_data.size();
     std::size_t index{};
     std::uint8_t currChar {}; 
@@ -269,6 +271,14 @@ void ImgOp::WriteAscii(const std::string& filePath) const
     std::string rowBuffer {};
     rowBuffer.reserve(m_width * 2); // multipled by 2 because we push 2 chars each time(for round shapes)
 
+   
+    int y_padding = (canvas_height > m_height) ? (canvas_height - m_height) / 2 : 0;
+    int x_padding = (canvas_width > (m_width * 2)) ? (canvas_width - (m_width * 2)) / 2 : 0;
+
+    std::string indent_spaces(x_padding, ' ');
+    
+    for (int i = 0; i < y_padding; ++i) 
+        resFile << '\n';
     
     for (int row = 0; row < m_height; row++)
     {
@@ -284,11 +294,56 @@ void ImgOp::WriteAscii(const std::string& filePath) const
             rowBuffer.push_back(currChar);
             rowBuffer.push_back(currChar);
         }
-        resFile << rowBuffer << '\n';
+        resFile << indent_spaces << rowBuffer << '\n';
 
     }
     resFile.close();
 }
+
+
+
+
+void ImgOp::printAsciiCenteredLive() const 
+{
+    // Define your terminal bounds
+    int term_rows = 425;
+    int term_cols = 2546;
+
+    // Calculate padding
+    int y_padding = (term_rows > m_height) ? (term_rows - m_height) / 2 : 0;
+    int x_padding = (term_cols > (m_width * 2)) ? (term_cols - (m_width * 2)) / 2 : 0;
+    std::string indent_spaces(x_padding, ' ');
+
+    // 1. Clear screen and reset cursor to top-left
+    std::cout << "\033[2J\033[H";
+
+    // 2. Print empty newlines to push the moon down into the vertical center
+    for (int i = 0; i < y_padding; ++i) {
+        std::cout << '\n';
+    }
+
+    // 3. Stream each row down naturally with horizontal indentation
+    for (int row = 0; row < m_height; ++row) 
+    {
+        std::cout << indent_spaces;
+        for (int col = 0; col < m_width; ++col) 
+        {
+            std::uint8_t currChar = getAsciiChar(m_data[row * m_width + col]);
+            std::cout << currChar << currChar; // Doubled for aspect ratio
+        }
+        std::cout << '\n';
+    }
+    std::cout << std::flush;
+}
+
+
+
+
+
+
+
+
+
 
 
 void ImgOp::printInfo() const

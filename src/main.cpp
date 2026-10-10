@@ -34,9 +34,9 @@ int main(int argc, char* argv[]) {
     ImgOp img {};     
     img.loadImg(parser.getSrcFilePath());
     img.convGrayScaleFromRgb(ImgOp::Mode::luminance); 
-    img.resizeImage(290, 720); 
+    img.resizeImage(350, 800); 
     img.WriteAscii(parser.getDstFilePath());   
-
+    //img.printAsciiCenteredLive();
 
     return 0;
 }
