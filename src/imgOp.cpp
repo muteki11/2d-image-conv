@@ -235,7 +235,6 @@ void ImgOp::resizeImage(int new_height, int new_width)
 
 
 
-
 bool ImgOp::areValidIndexAndParts(int Index, int yPart, int xPart) const
 {
     int dataSize = m_data.size();
@@ -304,10 +303,9 @@ uint8_t ImgOp::convultPixel(std::vector<uint8_t> &kernelTable, int kernelTableWi
 
 
 
-// returns the averege using kernel_convultion.
 // kernelTable is a 1d vector that is treated as a 2d vector.
-// uses m_data to access loaded image.
-void ImgOp::kernelConvult(std::vector<uint8_t> &kernelTable, int kernelTableWidth)
+// returns a new convulted Image
+std::vector<uint8_t> ImgOp::kernelConvult(std::vector<uint8_t> &kernelTable, int kernelTableWidth) const
 {
      
     #ifndef NDEBUG
@@ -327,17 +325,18 @@ void ImgOp::kernelConvult(std::vector<uint8_t> &kernelTable, int kernelTableWidt
             currPixelIndex = y * m_width + x;
             convultedImage.at(currPixelIndex) = currConvultedPixel; 
         }
-
     }
 
-    // here will move the tmp vector to m_data; 
+    return convultedImage;
 }
 
 
 
-
-
-
+void ImgOp::gaussianBlur()
+{
+    std::vector<uint8_t> convultedImage = kernelConvult(m_guassianBlurKernelTable, m_guassianBlurKernelTableWidth); 
+    m_data = std::move(convultedImage);
+}
 
 
 
