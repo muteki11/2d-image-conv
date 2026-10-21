@@ -236,41 +236,6 @@ void ImgOp::resizeImage(int new_height, int new_width)
 
 
 
-void ImgOp::testKernelConvult() 
-{
-    
-    std::vector<std::uint8_t> vec = {
-        1,   10,  22,  35,  48, 
-        60,  72,  85,  98,  110, 
-        125, 138, 150, 162, 175, 
-        188, 200, 212, 225, 235, 
-        240, 245, 250, 252, 255
-    };
-
-    std::vector<std::uint8_t> kernel_table = {
-        1, 2, 1,
-        2, 4, 2,
-        1, 2, 1
-    };
-
-    m_data = std::move(vec); 
-    m_width = 5;
-    m_height = 5;
-    
-    uint8_t convultedPixel {}; 
-    int kernel_width = 3;
-    
-    for (int y = 0; y < m_width; y++)
-        for (int x = 0; x < m_width; x++)
-        {
-            std::cout << "pixel before: " << static_cast<int>(m_data[y * m_width + x]) << std::endl;
-            convultedPixel = convultPixel(kernel_table, kernel_width, x, y);
-            std::cout << "pixel after convulting: " << static_cast<int>(convultedPixel) << std::endl << "----" << std::endl;
-        }
-
-}
-
-
 bool ImgOp::areValidIndexAndParts(int Index, int yPart, int xPart) const
 {
     int dataSize = m_data.size();
