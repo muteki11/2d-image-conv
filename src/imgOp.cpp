@@ -1,13 +1,15 @@
 #include <cstddef>
-#include <fstream>
+#include <cstdint>
+#include <cassert>
+#include <cmath>
 #include <ios>
 #include <iostream>
-#include <cstdint>
 #include <iterator>
-#include <ostream>
-#include <cassert>
-#include <stdexcept>
+#include <fstream>
 #include <filesystem>
+#include <numeric>
+#include <ostream>
+#include <stdexcept>
 #include <utility>
 #include <vector>
 #include "imgOp.h"
@@ -230,6 +232,148 @@ void ImgOp::resizeImage(int new_height, int new_width)
     m_width = new_width;
 
 }
+
+
+
+
+void ImgOp::testKernelConvult() 
+{
+    
+    std::vector<std::uint8_t> vec = {
+        1,   10,  22,  35,  48, 
+        60,  72,  85,  98,  110, 
+        125, 138, 150, 162, 175, 
+        188, 200, 212, 225, 235, 
+        240, 245, 250, 252, 255
+    };
+
+    std::vector<std::uint8_t> kernel_table = {
+        1, 2, 1,
+        2, 4, 2,
+        1, 2, 1
+    };
+
+    m_data = std::move(vec); 
+    m_width = 5;
+    m_height = 5;
+    
+    uint8_t convultedPixel {}; 
+    int kernel_width = 3;
+    
+    for (int y = 0; y < m_width; y++)
+        for (int x = 0; x < m_width; x++)
+        {
+            std::cout << "pixel before: " << static_cast<int>(m_data[y * m_width + x]) << std::endl;
+            convultedPixel = convultPixel(kernel_table, kernel_width, x, y);
+            std::cout << "pixel after convulting: " << static_cast<int>(convultedPixel) << std::endl << "----" << std::endl;
+        }
+
+}
+
+
+bool ImgOp::areValidIndexAndParts(int Index, int yPart, int xPart) const
+{
+    int dataSize = m_data.size();
+    return (Index >= 0 && Index < m_data.size() && yPart >= 0 && xPart >= 0 && xPart < m_width && yPart < m_height);
+}
+
+
+uint8_t ImgOp::convultPixel(std::vector<uint8_t> &kernelTable, int kernelTableWidth, int x, int y) const
+{
+    #ifndef NDEBUG
+    assert(kernelTableWidth > 0 && "kernelTableWidth must be positive!");
+    assert(x >= 0 && "x cannot be negetive!"); 
+    assert(y >= 0 && "y cannot be negetive!"); 
+    #endif
+
+    if (kernelTableWidth <= 0) throw std::runtime_error("width must be positive"); 
+    if (x < 0) throw std::runtime_error("x cannot be negetive"); 
+    if (y < 0) throw std::runtime_error("y cannot be negetive"); 
+    
+
+    size_t kernelTableLength = kernelTable.size(); 
+    int kernelTableHeight = kernelTableLength / kernelTableWidth;
+    int sumKernelTable {std::accumulate(kernelTable.begin(), kernelTable.end(), 0)};
+    std::vector<uint32_t> tmpResults(kernelTableLength);
+    std::vector<uint8_t> currPixelNeighboors(kernelTableLength);
+    size_t currPixelNeightboorsSize {currPixelNeighboors.size()};
+    uint8_t finalResult {};
+
+    // both offsets start from topLeftIndex
+    int yOffset = -1;
+    int yPartCalc {}; 
+
+    int xOffset = -1;
+    int xPartCalc {}; 
+    
+    bool areValid {false}; 
+    
+    uint32_t currRes {};
+    double sumMultiplied {0}; 
+    for (int i = 0; i < currPixelNeightboorsSize; i++)
+    {
+        yPartCalc = y+yOffset; 
+        xPartCalc = x+xOffset; 
+        int currIndex = yPartCalc * m_width + xPartCalc; 
+        
+        areValid = areValidIndexAndParts(currIndex, yPartCalc, xPartCalc);
+        if (areValid) currPixelNeighboors[i] = m_data[currIndex];
+        // else currPixelNeighboors[i] should already be 0; 
+         
+        currRes = currPixelNeighboors[i] * kernelTable[i];
+        tmpResults[i] = currRes; 
+        sumMultiplied += static_cast<int>(currRes); 
+
+        xOffset++;
+        if (xOffset > 1) 
+        {
+            xOffset = -1;
+            yOffset++; 
+        }
+    }
+
+    finalResult = static_cast<uint8_t>(round(sumMultiplied / sumKernelTable));
+    return static_cast<uint8_t>(finalResult);
+
+}
+
+
+
+// returns the averege using kernel_convultion.
+// kernelTable is a 1d vector that is treated as a 2d vector.
+// uses m_data to access loaded image.
+void ImgOp::kernelConvult(std::vector<uint8_t> &kernelTable, int kernelTableWidth)
+{
+     
+    #ifndef NDEBUG
+    assert(kernelTableWidth > 0 && "kernelTableWidth must be positive!");
+    #endif
+    if (kernelTableWidth <= 0) throw std::runtime_error("width must be positive"); 
+
+    int currPixelIndex{}; 
+    uint8_t currConvultedPixel {};
+    std::vector<uint8_t> convultedImage(m_data.size());
+
+    for (int y = 0; y < m_height; y++)
+    {
+        for (int x = 0; x < m_width; x++)
+        {
+            currConvultedPixel = convultPixel(kernelTable, kernelTableWidth, x, y); 
+            currPixelIndex = y * m_width + x;
+            convultedImage.at(currPixelIndex) = currConvultedPixel; 
+        }
+
+    }
+
+    // here will move the tmp vector to m_data; 
+}
+
+
+
+
+
+
+
 
 
 std::uint8_t ImgOp::getLuminanceValue(const std::uint8_t red, const std::uint8_t green, const std::uint8_t blue) const

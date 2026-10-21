@@ -34,9 +34,14 @@ int main(int argc, char* argv[]) {
     ImgOp img {};     
     img.loadImg(parser.getSrcFilePath());
     img.convGrayScaleFromRgb(ImgOp::Mode::luminance); 
+    // TODO: img.guassian_blur
+    // sobel edge detection
+    // thresholding
+
     img.resizeImage(350, 800); 
-    img.WriteAscii(parser.getDstFilePath());   
-    //img.printAsciiCenteredLive();
+    img.testKernelConvult();
+
+    //img.WriteAscii(parser.getDstFilePath());   
 
     return 0;
 }

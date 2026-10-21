@@ -22,8 +22,12 @@ private:
     std::uint8_t getLuminanceValue(const std::uint8_t red, const std::uint8_t green, const std::uint8_t blue) const;
     std::uint8_t getAsciiChar(std::uint8_t luminanceValue) const;
     std::vector<uint32_t> initDownSampleTable() const;
+    void kernelConvult(std::vector<uint8_t> &kernelTable, int kernelTableWidth);
+    uint8_t convultPixel(std::vector<uint8_t> &kernelTable, int kernelTableWidth, int x, int y) const;
+    bool areValidIndexAndParts(int Index, int yPart, int xPart) const;
 
 public:
+    
     enum class Mode
     {
         rgb,
@@ -40,7 +44,9 @@ public:
 
 
     ImgOp();        
-   
+  
+    
+    void testKernelConvult();
     bool loadImg(const std::string& filePath);
     bool convGrayScaleFromRgb(Mode mode); 
     bool saveImg(const std::string& filePath, ImageType imageType);
