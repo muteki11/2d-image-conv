@@ -242,7 +242,7 @@ bool ImgOp::areValidIndexAndParts(int Index, int yPart, int xPart) const
 }
 
 
-uint8_t ImgOp::convultPixel(std::vector<uint8_t> &kernelTable, int kernelTableWidth, int x, int y) const
+int ImgOp::sumConvultedPixel(const std::vector<int32_t> &kernelTable, int kernelTableWidth, int x, int y) const
 {
     #ifndef NDEBUG
     assert(kernelTableWidth > 0 && "kernelTableWidth must be positive!");
@@ -258,7 +258,6 @@ uint8_t ImgOp::convultPixel(std::vector<uint8_t> &kernelTable, int kernelTableWi
     size_t kernelTableLength = kernelTable.size(); 
     int kernelTableHeight = kernelTableLength / kernelTableWidth;
     int sumKernelTable {std::accumulate(kernelTable.begin(), kernelTable.end(), 0)};
-    std::vector<uint32_t> tmpResults(kernelTableLength);
     std::vector<uint8_t> currPixelNeighboors(kernelTableLength);
     size_t currPixelNeightboorsSize {currPixelNeighboors.size()};
     uint8_t finalResult {};
@@ -285,7 +284,6 @@ uint8_t ImgOp::convultPixel(std::vector<uint8_t> &kernelTable, int kernelTableWi
         // else currPixelNeighboors[i] should already be 0; 
          
         currRes = currPixelNeighboors[i] * kernelTable[i];
-        tmpResults[i] = currRes; 
         sumMultiplied += static_cast<int>(currRes); 
 
         xOffset++;
@@ -296,45 +294,109 @@ uint8_t ImgOp::convultPixel(std::vector<uint8_t> &kernelTable, int kernelTableWi
         }
     }
 
-    finalResult = static_cast<uint8_t>(round(sumMultiplied / sumKernelTable));
-    return static_cast<uint8_t>(finalResult);
+    return sumMultiplied;
 
 }
+
+
+
+
+
+
+
+
+
+
+
 
 
 
 // kernelTable is a 1d vector that is treated as a 2d vector.
 // returns a new convulted Image
-std::vector<uint8_t> ImgOp::kernelConvult(std::vector<uint8_t> &kernelTable, int kernelTableWidth) const
+std::vector<uint8_t> ImgOp::kernelConvult(ConvultionModes mode) const
 {
-     
-    #ifndef NDEBUG
-    assert(kernelTableWidth > 0 && "kernelTableWidth must be positive!");
-    #endif
-    if (kernelTableWidth <= 0) throw std::runtime_error("width must be positive"); 
-
     int currPixelIndex{}; 
     uint8_t currConvultedPixel {};
     std::vector<uint8_t> convultedImage(m_data.size());
+    
+    double sumMultiplied {0}; 
 
-    for (int y = 0; y < m_height; y++)
-    {
-        for (int x = 0; x < m_width; x++)
+    if (mode == ConvultionModes::gaussian) 
+    {   
+        int sumKernelTable = std::accumulate(m_guassianBlurKernelTable.begin(), m_guassianBlurKernelTable.end(), 0);
+        for (int y = 0; y < m_height; y++)
         {
-            currConvultedPixel = convultPixel(kernelTable, kernelTableWidth, x, y); 
-            currPixelIndex = y * m_width + x;
-            convultedImage.at(currPixelIndex) = currConvultedPixel; 
+            for (int x = 0; x < m_width; x++)
+            {
+                sumMultiplied = sumConvultedPixel(m_guassianBlurKernelTable, m_guassianBlurKernelTableWidth, x ,y); 
+                currConvultedPixel = static_cast<uint8_t>(round(sumMultiplied / sumKernelTable));
+                currPixelIndex = y * m_width + x;
+                convultedImage.at(currPixelIndex) = currConvultedPixel; 
+            }
         }
-    }
+    } 
 
+    else if (mode == ConvultionModes::edgeDetection) 
+    { 
+        std::vector<int32_t> gradientImage {};
+        int32_t maxGradient {getMaxGradientsVectorInit(gradientImage)};
+        int32_t threshold = 50; 
+
+        int32_t currGradient {};
+        for (int y = 0; y < m_height; y++)
+            for (int x = 0; x < m_width; x++)
+            {
+                currGradient = gradientImage[y * m_width + x]; 
+                if 
+                    (maxGradient == 0) convultedImage[y * m_width + x] = 0;
+                else 
+                    convultedImage[y * m_width + x] = static_cast<uint8_t>(std::round((static_cast<double>(currGradient) / maxGradient) * 255));
+            }
+    }
     return convultedImage;
 }
+
+// this function is for kernelConvult internal use only
+// returns the maximum Gradient and inits the gradients vector parameter
+int32_t ImgOp::getMaxGradientsVectorInit(std::vector<int32_t> &gradientVector) const
+{
+    gradientVector.resize(m_width * m_height); 
+
+    int32_t maxGradient {0};
+    int xGradient {0};
+    int yGradient {0};
+    int32_t currGradient {0};
+
+    for (int y = 0; y < m_height; y++)
+        for (int x = 0; x < m_width; x++)
+        {
+            xGradient = sumConvultedPixel(m_edgeDetectionKernelTableX, m_edgeDetectionKernelTableWidthX, x, y); 
+            yGradient = sumConvultedPixel(m_edgeDetectionKernelTableY, m_edgeDetectionKernelTableWidthY, x, y); 
+            currGradient = std::hypot(xGradient, yGradient);
+            gradientVector[y * m_width + x] = currGradient;
+            maxGradient = currGradient > maxGradient ? currGradient : maxGradient;
+        } 
+
+    return maxGradient;
+}
+
+
+
+
+
+void ImgOp::edgeDetection()
+{
+    std::vector<uint8_t> convultedImage = kernelConvult(ConvultionModes::edgeDetection); 
+    m_data = std::move(convultedImage);
+}
+
+
 
 
 
 void ImgOp::gaussianBlur()
 {
-    std::vector<uint8_t> convultedImage = kernelConvult(m_guassianBlurKernelTable, m_guassianBlurKernelTableWidth); 
+    std::vector<uint8_t> convultedImage = kernelConvult(ConvultionModes::gaussian); 
     m_data = std::move(convultedImage);
 }
 

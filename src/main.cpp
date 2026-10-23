@@ -36,8 +36,9 @@ int main(int argc, char* argv[]) {
     img.convGrayScaleFromRgb(ImgOp::Mode::luminance); 
     img.resizeImage(350, 800); 
     img.gaussianBlur();    
+    img.edgeDetection();   
+
     //TODO: 
-    //sobel edge detection
     // thresholding
 
     img.WriteAscii(parser.getDstFilePath());   
