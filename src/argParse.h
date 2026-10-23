@@ -25,13 +25,18 @@ class ArgParse
         std::string getSrcFilePath() const;
         std::string getDstFilePath() const;
         DstFileType getDstFileType() const; 
+        bool getIsEdge() const;
+        bool getIsBlendEdgeLumi() const;
+        bool getIsGamma() const;
 
     private:
         CLI::App m_convApp{"App description"};
         std::string m_srcFilePath;
         std::string m_dstFilePath;
         DstFileType m_dstFileType;
-
+        bool m_isEdge {false};
+        bool m_isBlendEdgeLumi {false};
+        bool m_isGamma {false};
 };
 
 #endif
