@@ -1,3 +1,4 @@
+#include <algorithm>
 #include <cstddef>
 #include <cstdint>
 #include <cassert>
@@ -192,6 +193,8 @@ void ImgOp::resizeImage(int new_height, int new_width)
     #endif
     if (m_channels != 1) throw std::runtime_error("m_channels not set to luminance");
     
+    new_height = static_cast<int>(m_height * (static_cast<double>(new_width) / m_width) * 0.5);
+
     // m_channels should be 1 anyway for now
     std::size_t originalDataSize {static_cast<std::size_t>(m_width) * m_height * m_channels}; 
     std::size_t newDataSize {static_cast<std::size_t>(new_width) * new_height * m_channels};
@@ -300,13 +303,25 @@ int ImgOp::sumConvultedPixel(const std::vector<int32_t> &kernelTable, int kernel
 
 
 
+void ImgOp::gamma()
+{
+    uint8_t currPixel {}; 
+    for (int y = 0; y < m_height; y++)
+        for (int x = 0; x < m_width; x++)
+        { 
+            currPixel = m_data[y * m_width + x]; 
+            m_data[y * m_width + x] = gammaPixel(currPixel); 
+        }
+
+}
 
 
-
-
-
-
-
+uint8_t ImgOp::gammaPixel(uint8_t currPixel) const
+{
+    double normalized = static_cast<double>(currPixel) / 255.0;
+    double adjusted = std::pow(normalized, 0.8); // Gamma curve to boost midtones
+    return static_cast<uint8_t>(adjusted * 255.0);
+}
 
 
 
@@ -330,6 +345,7 @@ std::vector<uint8_t> ImgOp::kernelConvult(ConvultionModes mode) const
             {
                 sumMultiplied = sumConvultedPixel(m_guassianBlurKernelTable, m_guassianBlurKernelTableWidth, x ,y); 
                 currConvultedPixel = static_cast<uint8_t>(round(sumMultiplied / sumKernelTable));
+                
                 currPixelIndex = y * m_width + x;
                 convultedImage.at(currPixelIndex) = currConvultedPixel; 
             }
@@ -399,6 +415,32 @@ void ImgOp::gaussianBlur()
     std::vector<uint8_t> convultedImage = kernelConvult(ConvultionModes::gaussian); 
     m_data = std::move(convultedImage);
 }
+
+
+void ImgOp::blendEdgeLumi()
+{
+    std::vector<uint8_t> edgeImage = kernelConvult(ConvultionModes::edgeDetection); 
+    std::vector<uint8_t> lumiImage = kernelConvult(ConvultionModes::gaussian); 
+    size_t lumiImageSize = lumiImage.size(); 
+    std::vector<uint8_t> blendedImage(lumiImageSize);
+    const double edgeWeight {0.5};
+  
+    double currPixel {};
+    double base {};
+    double edgeBoost {};
+    for (int i = 0; i < lumiImageSize; i++)
+    {
+        base = lumiImage[i];
+        edgeBoost = edgeImage[i] * edgeWeight;
+        currPixel= std::max(base, edgeBoost);
+        blendedImage[i] = static_cast<uint8_t>(std::clamp(currPixel, 0.0, 255.0));
+
+    }
+    m_data = std::move(blendedImage);
+
+
+}
+
 
 
 

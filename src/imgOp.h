@@ -24,7 +24,6 @@ private:
     int m_channels {};
     // 70 levels of ramp intensity
     const std::string m_asciiPalette {" .'`^\",:;Il!i><~+_-?][}{1)(|\\/tfjrxnuvczXYUJCLQ0OZmwqpdbkhao*#MW&8%B@$"};
-    
     const int m_guassianBlurKernelTableWidth {3};
     std::vector<int32_t> m_guassianBlurKernelTable {
         1, 2, 1,
@@ -56,6 +55,7 @@ private:
     int sumConvultedPixel(const std::vector<int32_t> &kernelTable, int kernelTableWidth, int x, int y) const;
     bool areValidIndexAndParts(int Index, int yPart, int xPart) const;
     int getMaxGradientsVectorInit(std::vector<int> &gradientVector) const;
+    uint8_t gammaPixel(uint8_t currPixel) const;
 
 public:
     
@@ -83,6 +83,8 @@ public:
     void resizeImage(int new_height, int new_width);
     void gaussianBlur();  
     void edgeDetection(); 
+    void blendEdgeLumi();
+    void gamma();
 
     std::size_t getImgSize() const; 
     void printInfo() const;

@@ -36,10 +36,10 @@ int main(int argc, char* argv[]) {
     img.convGrayScaleFromRgb(ImgOp::Mode::luminance); 
     img.resizeImage(350, 800); 
     img.gaussianBlur();    
-    img.edgeDetection();   
-
-    //TODO: 
-    // thresholding
+    
+    if (parser.getIsEdge()) img.edgeDetection();
+    else if (parser.getIsGamma()) img.gamma();
+    else if (parser.getIsBlendEdgeLumi()) img.blendEdgeLumi(); 
 
     img.WriteAscii(parser.getDstFilePath());   
 
