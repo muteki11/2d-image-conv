@@ -186,14 +186,14 @@ std::vector<uint32_t> ImgOp::initDownSampleTable() const
 
 
 
-void ImgOp::resizeImage(int new_height, int new_width)
+void ImgOp::resizeImage(int new_width)
 {
     #ifndef NDEBUG
     assert(m_channels == 1 && "this function only supports 1 byte per pixel"); 
     #endif
     if (m_channels != 1) throw std::runtime_error("m_channels not set to luminance");
     
-    new_height = static_cast<int>(m_height * (static_cast<double>(new_width) / m_width) * 0.5);
+    int new_height = static_cast<int>(m_height * (static_cast<double>(new_width) / m_width) * 0.5);
 
     // m_channels should be 1 anyway for now
     std::size_t originalDataSize {static_cast<std::size_t>(m_width) * m_height * m_channels}; 

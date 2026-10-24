@@ -10,7 +10,6 @@ ArgParse::ArgParse()
         m_convApp.add_option("-d,--dst", m_dstFilePath, "specifes the path to save the new image, if not used then uses the src path by default. if path doesn't exist creates it.");
         
         m_convApp.add_option("--width", m_newWidth, "specifies the new width that will be used."); 
-        m_convApp.add_option("--height", m_newHeight, "specifies the new height that will be used."); 
 
 
         m_convApp.add_flag("--edge", m_isEdge, "when present will use edge detection.");
@@ -57,7 +56,6 @@ bool ArgParse::getIsEdge() const {return m_isEdge;}
 bool ArgParse::getIsBlendEdgeLumi() const {return m_isBlendEdgeLumi;} 
 bool ArgParse::getIsGamma() const {return m_isGamma;} 
 int ArgParse::getNewWidth() const {return m_newWidth;}
-int ArgParse::getNewHeight() const {return m_newHeight;}
 
 
 

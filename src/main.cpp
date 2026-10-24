@@ -37,8 +37,7 @@ int main(int argc, char* argv[]) {
     img.convGrayScaleFromRgb(ImgOp::Mode::luminance); 
     
     img.setNewWidth(parser.getNewWidth()); 
-    img.setNewHeight(parser.getNewHeight()); 
-    img.resizeImage(img.getNewHeight(), img.getNewWidth()); 
+    img.resizeImage(img.getNewWidth()); 
     
     img.gaussianBlur();    
     if (parser.getIsEdge()) img.edgeDetection();

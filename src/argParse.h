@@ -30,7 +30,6 @@ class ArgParse
         bool getIsBlendEdgeLumi() const;
         bool getIsGamma() const;
         int getNewWidth() const;
-        int getNewHeight() const;
         std::size_t countOp(std::string_view name) const;    
 
     private:
@@ -42,7 +41,6 @@ class ArgParse
         bool m_isBlendEdgeLumi {false};
         bool m_isGamma {false};
         int m_newWidth {800};
-        int m_newHeight {350};
 
 
 };

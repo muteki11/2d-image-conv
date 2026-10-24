@@ -21,7 +21,6 @@ private:
     int m_width {}; // in pixels
     int m_height {}; // in pixels
     int m_newWidth {800}; // in pixels
-    int m_newHeight {350}; // in pixels
     
 
 
@@ -86,7 +85,7 @@ public:
     bool loadImg(const std::string& filePath);
     bool convGrayScaleFromRgb(Mode mode); 
     bool saveImg(const std::string& filePath, ImageType imageType);
-    void resizeImage(int new_height, int new_width);
+    void resizeImage(int new_width);
     void gaussianBlur();  
     void edgeDetection(); 
     void blendEdgeLumi();
@@ -102,12 +101,9 @@ public:
     int getwidth() const {return m_width;}
     int getHeight() const {return m_height;}
     int getNewWidth() const {return m_newWidth;}
-    int getNewHeight() const {return m_newHeight;}
     int getChannels() const {return m_channels;}
 
-
     void setNewWidth(int newWidth) {m_newWidth = newWidth;}
-    void setNewHeight(int newHeight) {m_newHeight = newHeight;}
 
 
 
