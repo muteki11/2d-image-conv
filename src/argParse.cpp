@@ -9,6 +9,10 @@ ArgParse::ArgParse()
         m_convApp.add_option("-s,--src", m_srcFilePath, "specifies the path of the image that is to be modified.") -> required();
         m_convApp.add_option("-d,--dst", m_dstFilePath, "specifes the path to save the new image, if not used then uses the src path by default. if path doesn't exist creates it.");
         
+        m_convApp.add_option("--width", m_newWidth, "specifies the new width that will be used."); 
+        m_convApp.add_option("--height", m_newHeight, "specifies the new height that will be used."); 
+
+
         m_convApp.add_flag("--edge", m_isEdge, "when present will use edge detection.");
         m_convApp.add_flag("--edgeLumi", m_isBlendEdgeLumi, "when present will blend edge detection and guassian blur; different from --edge");
         m_convApp.add_flag("--gamma", m_isGamma, "when present will use gamma modification");
@@ -34,9 +38,17 @@ bool ArgParse::parse(int argc, char* argv[])
     }
     
     if (m_convApp.count("--dst") == 0) m_dstFilePath = m_srcFilePath;
+    
 
     return true; 
 }
+
+std::size_t ArgParse::countOp(std::string_view name) const    
+{
+    std::size_t count = m_convApp.count(static_cast<std::string>(name));
+    return count;
+}
+
 
 std::string ArgParse::getSrcFilePath() const {return m_srcFilePath;}
 std::string ArgParse::getDstFilePath() const {return m_dstFilePath;}
@@ -44,6 +56,8 @@ ArgParse::DstFileType ArgParse::getDstFileType() const {return m_dstFileType;}
 bool ArgParse::getIsEdge() const {return m_isEdge;} 
 bool ArgParse::getIsBlendEdgeLumi() const {return m_isBlendEdgeLumi;} 
 bool ArgParse::getIsGamma() const {return m_isGamma;} 
+int ArgParse::getNewWidth() const {return m_newWidth;}
+int ArgParse::getNewHeight() const {return m_newHeight;}
 
 
 

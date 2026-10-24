@@ -31,12 +31,16 @@ int main(int argc, char* argv[]) {
     bool res {setValues(parser, imageDstType)};
     if (!res) throw std::runtime_error("setValues failed!");
 
+
     ImgOp img {};     
     img.loadImg(parser.getSrcFilePath());
     img.convGrayScaleFromRgb(ImgOp::Mode::luminance); 
-    img.resizeImage(350, 800); 
-    img.gaussianBlur();    
     
+    img.setNewWidth(parser.getNewWidth()); 
+    img.setNewHeight(parser.getNewHeight()); 
+    img.resizeImage(img.getNewHeight(), img.getNewWidth()); 
+    
+    img.gaussianBlur();    
     if (parser.getIsEdge()) img.edgeDetection();
     else if (parser.getIsGamma()) img.gamma();
     else if (parser.getIsBlendEdgeLumi()) img.blendEdgeLumi(); 
@@ -51,6 +55,8 @@ int main(int argc, char* argv[]) {
 
 bool setValues(ArgParse& parser, ImgOp::ImageType& imageDstType)
 {
+    
+
     ArgParse::DstFileType fileType{parser.getDstFileType()};
     switch (fileType)
     {

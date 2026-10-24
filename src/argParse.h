@@ -2,6 +2,7 @@
 #define ARGPARSE_H
 
 #include "CLI11.hpp" 
+#include <string_view>
 
 class ArgParse
 {
@@ -28,6 +29,9 @@ class ArgParse
         bool getIsEdge() const;
         bool getIsBlendEdgeLumi() const;
         bool getIsGamma() const;
+        int getNewWidth() const;
+        int getNewHeight() const;
+        std::size_t countOp(std::string_view name) const;    
 
     private:
         CLI::App m_convApp{"App description"};
@@ -37,6 +41,10 @@ class ArgParse
         bool m_isEdge {false};
         bool m_isBlendEdgeLumi {false};
         bool m_isGamma {false};
+        int m_newWidth {800};
+        int m_newHeight {350};
+
+
 };
 
 #endif
